@@ -242,6 +242,7 @@ def sample_plot_image(model, name ='dd.png'):
     # Sample noise
     img_size = IMG_SIZE
     img = torch.randn((1, 3, img_size, img_size), device=device)
+    plt.cla()
     plt.figure(figsize=(15,15))
     plt.axis('off')
     num_images = 10
@@ -253,7 +254,7 @@ def sample_plot_image(model, name ='dd.png'):
             plt.subplot(1, num_images, i/stepsize+1)
             show_tensor_image(img.detach().cpu())
     plt.savefig(name)
-    plt.show()
+    # plt.show()
 
 
 # Simulate forward diffusion
@@ -277,10 +278,12 @@ model.to(device)
 optimizer = Adam(model.parameters(), lr=0.001)
 # sample_plot_image(model)
 
-def run(model, dataloader, epoch):
-  for step, batch in enumerate(dataloader):
-    optimizer.zero_grad()
-    t = torch.randint(0, T, (BATCH_SIZE,), device=device).long()
-    loss = get_loss(model, batch[0], t)
-    loss.backward()
-    optimizer.step()
+def run(model, dataloader, epochs):
+  for e in range(epochs):
+    for step, batch in enumerate(dataloader):
+      optimizer.zero_grad()
+      t = torch.randint(0, T, (BATCH_SIZE,), device=device).long()
+      loss = get_loss(model, batch[0], t)
+      loss.backward()
+      optimizer.step()
+    sample_plot_image(model, f'e{e}.png')
